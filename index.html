@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fuel Pump Dip Calculator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        hsd: {
+                            DEFAULT: '#16a34a', // Emerald Green
+                            light: '#f0fdf4',
+                            border: '#86efac',
+                            text: '#15803d'
+                        },
+                        pmg: {
+                            DEFAULT: '#2563eb', // Royal Blue
+                            light: '#eff6ff',
+                            border: '#93c5fd',
+                            text: '#1d4ed8'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Touch feedback & prevent text selection on keypad */
+        .key-btn {
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        .key-btn:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen font-sans flex flex-col justify-between text-slate-800 antialiased select-none">
+
+    <!-- Top Header -->
+    <header class="bg-white border-b border-slate-200 text-slate-800 shadow-xs sticky top-0 z-40">
+        <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2.5">
+                <div id="headerLogo" class="bg-hsd text-white rounded-xl font-black text-lg flex items-center justify-center w-9 h-9 shadow-sm transition-colors duration-300">
+                    <i class="fa-solid fa-calculator"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-base leading-tight tracking-tight text-slate-900">DIP CALCULATOR</h1>
+                    <p class="text-[11px] text-slate-500 font-medium">Fuel Station Calculator</p>
+                </div>
+            </div>
+            <span class="text-[10px] font-extrabold bg-slate-200 text-slate-700 px-2.5 py-1 rounded-full border border-slate-300 tracking-wide">MM ONLY</span>
+        </div>
+    </header>
+
+    <!-- Main Calculator Body -->
+    <main class="max-w-md mx-auto w-full px-3 py-3 flex-grow flex flex-col justify-between space-y-3">
+
+        <!-- Fuel Selector Bar -->
+        <div class="grid grid-cols-2 gap-2 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
+            <button id="btnHSD" onclick="selectFuel('HSD')" class="py-2.5 rounded-xl flex items-center justify-center gap-2 font-black transition border-2 border-hsd bg-hsd-light text-hsd-text shadow-xs">
+                <i class="fa-solid fa-truck-droplet text-sm"></i>
+                <span class="text-sm">HSD (Diesel)</span>
+            </button>
+            <button id="btnPMG" onclick="selectFuel('PMG')" class="py-2.5 rounded-xl flex items-center justify-center gap-2 font-black transition border-2 border-transparent text-slate-500 hover:text-slate-800">
+                <i class="fa-solid fa-gas-pump text-sm"></i>
+                <span class="text-sm">PMG (Petrol)</span>
+            </button>
+        </div>
+
+        <!-- Calculator Screen Display (Light Theme & High Contrast Black Text) -->
+        <div id="displayContainer" class="bg-white text-slate-900 p-4 rounded-2xl shadow-sm border-2 border-hsd space-y-3 relative overflow-hidden transition-colors duration-300">
+            <div id="bgWatermark" class="absolute -right-4 -bottom-4 text-slate-100 text-8xl font-black pointer-events-none">
+                <i class="fa-solid fa-droplet"></i>
+            </div>
+
+            <div class="relative z-10 space-y-2">
+                <!-- Current Input Status Header -->
+                <div class="flex justify-between items-center text-slate-500 text-xs font-bold border-b border-slate-100 pb-2">
+                    <span id="dispFuelBadge" class="bg-hsd text-white text-[10px] font-black px-2.5 py-0.5 rounded-md tracking-wider transition-colors duration-300">HSD TANK</span>
+                    <span class="text-slate-500 font-semibold text-[11px]" id="tankSpecText">L: 3022mm | R: 1384mm</span>
+                </div>
+
+                <!-- Live Dip Input Value -->
+                <div class="flex justify-between items-baseline pt-1">
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Dip Reading:</span>
+                    <div class="text-right">
+                        <span id="dispDip" class="text-3xl font-black font-mono text-slate-900 tracking-tight">0</span>
+                        <span class="text-xs font-extrabold text-slate-500 ml-1">mm</span>
+                    </div>
+                </div>
+
+                <!-- Output Volume - Deep Black Text for Sunlight Visibility -->
+                <div class="flex justify-between items-baseline border-t border-slate-100 pt-2">
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Fuel Volume:</span>
+                    <div class="text-right">
+                        <span id="dispLiters" class="text-4xl font-black font-mono text-black tracking-tight">0.00</span>
+                        <span id="litersUnit" class="text-sm font-black text-hsd-text ml-1 transition-colors duration-300">Liters</span>
+                    </div>
+                </div>
+
+                <!-- Visual Capacity Bar -->
+                <div class="space-y-1 pt-1">
+                    <div class="flex justify-between text-[10px] font-bold text-slate-500">
+                        <span>Fill Percentage</span>
+                        <span id="dispCapacityText">0.0% (Max 18,172 L)</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-3 p-0.5 border border-slate-200 overflow-hidden">
+                        <div id="capacityBar" class="bg-hsd h-full rounded-full transition-all duration-200" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calculator Keypad Grid -->
+        <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+            <!-- Row 1: Keypad Clear, Backspace, Copy, Save -->
+            <div class="grid grid-cols-4 gap-2">
+                <button onclick="keyPress('CLEAR')" class="key-btn py-3.5 bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-rose-700 border border-rose-200 rounded-xl font-black text-lg transition shadow-xs flex items-center justify-center">
+                    C
+                </button>
+                <button onclick="keyPress('BACK')" class="key-btn py-3.5 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-xl font-black text-lg transition shadow-xs flex items-center justify-center">
+                    <i class="fa-solid fa-backspace"></i>
+                </button>
+                <button onclick="copyLiters()" class="key-btn py-3.5 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 rounded-xl font-bold text-xs transition shadow-xs flex flex-col items-center justify-center gap-0.5">
+                    <i class="fa-solid fa-copy text-sm"></i>
+                    <span>Copy</span>
+                </button>
+                <button id="btnSave" onclick="keyPress('ENTER')" class="key-btn py-3.5 bg-hsd hover:opacity-90 active:scale-95 text-white rounded-xl font-black text-xl transition shadow-md row-span-2 flex flex-col items-center justify-center gap-1">
+                    <i class="fa-solid fa-level-down-alt rotate-90 text-base"></i>
+                    <span class="text-xs font-black tracking-wider">SAVE</span>
+                </button>
+            </div>
+
+            <!-- Numeric Buttons Grid (7, 8, 9, 4, 5, 6, 1, 2, 3, 0, .) -->
+            <div class="grid grid-cols-4 gap-2">
+                <!-- Row 2 -->
+                <button onclick="keyPress('7')" class="key-btn py-3.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">7</button>
+                <button onclick="keyPress('8')" class="key-btn py-3.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">8</button>
+                <button onclick="keyPress('9')" class="key-btn py-3.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">9</button>
+
+                <!-- Row 3 -->
+                <button onclick="keyPress('4')" class="key-btn py-3.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">4</button>
+                <button onclick="keyPress('5')" class="key-btn py-3.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">5</button>
+                <button onclick="keyPress('6')" class="key-btn py-3.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">6</button>
+
+                <!-- Row 4 -->
+                <button onclick="keyPress('1')" class="key-btn py-3.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">1</button>
+                <button onclick="keyPress('2')" class="key-btn py-3.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">2</button>
+                <button onclick="keyPress('3')" class="key-btn py-3.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">3</button>
+
+                <!-- Row 5: 0 & Decimal -->
+                <button onclick="keyPress('0')" class="key-btn py-3.5 col-span-2 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">0</button>
+                <button onclick="keyPress('.')" class="key-btn py-3.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">.</button>
+            </div>
+        </div>
+
+        <!-- History Section -->
+        <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xs font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-clock-rotate-left text-slate-700"></i>
+                    <span>Saved Readings</span>
+                </h3>
+                <button onclick="clearHistory()" class="text-[11px] font-bold text-slate-400 hover:text-rose-600 transition">Clear All</button>
+            </div>
+            <div id="historyList" class="space-y-1.5 max-h-40 overflow-y-auto divide-y divide-slate-100 pr-1">
+                <p class="text-xs text-slate-400 text-center py-3">No saved readings yet.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-2xl text-xs font-bold hidden z-50 flex items-center gap-2 border border-slate-700">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toastMsg">Saved entry to history</span>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        // Tank Dimensions Specification
+        const SPECS = {
+            PMG: { length: 7569, radius: 1384, clearance: 15, maxVol: 45516 },
+            HSD: { length: 3022, radius: 1384, clearance: 15, maxVol: 18172 }
+        };
+
+        // State Variables
+        let currentFuel = 'HSD';
+        let dipString = '0';
+        let calculatedLiters = 0;
+        let historyData = JSON.parse(localStorage.getItem('fuel_history_calculator')) || [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHistory();
+            recalculate();
+
+            // Listen to Physical Keyboard Input
+            document.addEventListener('keydown', (e) => {
+                if (e.key >= '0' && e.key <= '9') keyPress(e.key);
+                else if (e.key === '.') keyPress('.');
+                else if (e.key === 'Backspace') keyPress('BACK');
+                else if (e.key === 'Escape' || e.key === 'c' || e.key === 'C') keyPress('CLEAR');
+                else if (e.key === 'Enter') keyPress('ENTER');
+            });
+        });
+
+        // Toggle Fuel Theme (HSD = Green, PMG = Blue)
+        function selectFuel(type) {
+            currentFuel = type;
+            const btnHSD = document.getElementById('btnHSD');
+            const btnPMG = document.getElementById('btnPMG');
+            const badge = document.getElementById('dispFuelBadge');
+            const specText = document.getElementById('tankSpecText');
+            const displayContainer = document.getElementById('displayContainer');
+            const capacityBar = document.getElementById('capacityBar');
+            const litersUnit = document.getElementById('litersUnit');
+            const btnSave = document.getElementById('btnSave');
+            const headerLogo = document.getElementById('headerLogo');
+
+            const spec = SPECS[type];
+            specText.innerText = `L: ${spec.length}mm | R: ${spec.radius}mm`;
+
+            if (type === 'HSD') {
+                btnHSD.className = "py-2.5 rounded-xl flex items-center justify-center gap-2 font-black transition border-2 border-hsd bg-hsd-light text-hsd-text shadow-xs";
+                btnPMG.className = "py-2.5 rounded-xl flex items-center justify-center gap-2 font-black transition border-2 border-transparent text-slate-500 hover:text-slate-800";
+                
+                badge.className = "bg-hsd text-white text-[10px] font-black px-2.5 py-0.5 rounded-md tracking-wider transition-colors duration-300";
+                badge.innerText = "HSD TANK";
+
+                displayContainer.className = "bg-white text-slate-900 p-4 rounded-2xl shadow-sm border-2 border-hsd space-y-3 relative overflow-hidden transition-colors duration-300";
+                capacityBar.className = "bg-hsd h-full rounded-full transition-all duration-200";
+                litersUnit.className = "text-sm font-black text-hsd-text ml-1 transition-colors duration-300";
+                btnSave.className = "key-btn py-3.5 bg-hsd hover:opacity-90 active:scale-95 text-white rounded-xl font-black text-xl transition shadow-md row-span-2 flex flex-col items-center justify-center gap-1";
+                headerLogo.className = "bg-hsd text-white rounded-xl font-black text-lg flex items-center justify-center w-9 h-9 shadow-sm transition-colors duration-300";
+            } else {
+                btnPMG.className = "py-2.5 rounded-xl flex items-center justify-center gap-2 font-black transition border-2 border-pmg bg-pmg-light text-pmg-text shadow-xs";
+                btnHSD.className = "py-2.5 rounded-xl flex items-center justify-center gap-2 font-black transition border-2 border-transparent text-slate-500 hover:text-slate-800";
+                
+                badge.className = "bg-pmg text-white text-[10px] font-black px-2.5 py-0.5 rounded-md tracking-wider transition-colors duration-300";
+                badge.innerText = "PMG TANK";
+
+                displayContainer.className = "bg-white text-slate-900 p-4 rounded-2xl shadow-sm border-2 border-pmg space-y-3 relative overflow-hidden transition-colors duration-300";
+                capacityBar.className = "bg-pmg h-full rounded-full transition-all duration-200";
+                litersUnit.className = "text-sm font-black text-pmg-text ml-1 transition-colors duration-300";
+                btnSave.className = "key-btn py-3.5 bg-pmg hover:opacity-90 active:scale-95 text-white rounded-xl font-black text-xl transition shadow-md row-span-2 flex flex-col items-center justify-center gap-1";
+                headerLogo.className = "bg-pmg text-white rounded-xl font-black text-lg flex items-center justify-center w-9 h-9 shadow-sm transition-colors duration-300";
+            }
+
+            recalculate();
+        }
+
+        // On-Screen Keypad Handler
+        function keyPress(key) {
+            if (key === 'CLEAR') {
+                dipString = '0';
+            } else if (key === 'BACK') {
+                if (dipString.length > 1) {
+                    dipString = dipString.slice(0, -1);
+                } else {
+                    dipString = '0';
+                }
+            } else if (key === '.') {
+                if (!dipString.includes('.')) {
+                    dipString += '.';
+                }
+            } else if (key === 'ENTER') {
+                saveReading();
+                return;
+            } else { // Digit 0-9
+                if (dipString === '0') {
+                    dipString = key;
+                } else {
+                    if (dipString.length < 7) {
+                        dipString += key;
+                    }
+                }
+            }
+
+            recalculate();
+        }
+
+        /**
+         * Exact Geometric Dip Formula
+         */
+        function recalculate() {
+            const dip = parseFloat(dipString);
+            const spec = SPECS[currentFuel];
+
+            if (isNaN(dip) || dip <= 0) {
+                calculatedLiters = 0;
+                updateDisplay(dipString, 0, 0);
+                return;
+            }
+
+            let heff = dip + spec.clearance;
+
+            if (heff > 2 * spec.radius) {
+                heff = 2 * spec.radius;
+            }
+
+            let term1 = Math.pow(spec.radius, 2) * Math.acos((spec.radius - heff) / spec.radius);
+            let term2 = (spec.radius - heff) * Math.sqrt(2 * spec.radius * heff - Math.pow(heff, 2));
+
+            let liters = (spec.length * (term1 - (isNaN(term2) ? 0 : term2))) / 1000000;
+            liters = Math.max(0, liters);
+
+            calculatedLiters = Number(liters.toFixed(2));
+            const fillPercent = Math.min(100, Math.max(0, (calculatedLiters / spec.maxVol) * 100));
+
+            updateDisplay(dipString, calculatedLiters, fillPercent);
+        }
+
+        // Display Refresher
+        function updateDisplay(dipVal, liters, fillPercent) {
+            document.getElementById('dispDip').innerText = dipVal;
+            document.getElementById('dispLiters').innerText = liters.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            
+            const maxVol = SPECS[currentFuel].maxVol;
+            document.getElementById('dispCapacityText').innerText = `${fillPercent.toFixed(1)}% (Max ${maxVol.toLocaleString()} L)`;
+            document.getElementById('capacityBar').style.width = `${fillPercent}%`;
+        }
+
+        // Save Current Reading
+        function saveReading() {
+            const dipVal = parseFloat(dipString);
+            if (isNaN(dipVal) || dipVal <= 0 || calculatedLiters <= 0) {
+                showToast("Enter a valid dip before saving", "fa-triangle-exclamation");
+                return;
+            }
+
+            const record = {
+                id: Date.now(),
+                fuel: currentFuel,
+                dip: dipVal,
+                liters: calculatedLiters,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                date: new Date().toLocaleDateString([], { month: 'short', day: 'numeric' })
+            };
+
+            historyData.unshift(record);
+            if (historyData.length > 20) historyData.pop();
+
+            localStorage.setItem('fuel_history_calculator', JSON.stringify(historyData));
+            renderHistory();
+            showToast("Saved to history!", "fa-circle-check");
+        }
+
+        // Copy Liters
+        function copyLiters() {
+            if (calculatedLiters <= 0) {
+                showToast("Enter a dip value first", "fa-triangle-exclamation");
+                return;
+            }
+
+            const textToCopy = `${calculatedLiters} Liters`;
+            const textarea = document.createElement('textarea');
+            textarea.value = textToCopy;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast(`Copied ${textToCopy}!`, "fa-copy");
+            } catch (err) {
+                showToast("Failed to copy", "fa-xmark");
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // Render History List
+        function renderHistory() {
+            const list = document.getElementById('historyList');
+
+            if (historyData.length === 0) {
+                list.innerHTML = `<p class="text-xs text-slate-400 text-center py-3">No saved readings yet.</p>`;
+                return;
+            }
+
+            list.innerHTML = historyData.map(item => `
+                <div class="pt-2 pb-1 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-0.5 font-black rounded text-[10px] ${item.fuel === 'HSD' ? 'bg-hsd-light text-hsd-text border border-hsd-border' : 'bg-pmg-light text-pmg-text border border-pmg-border'}">
+                            ${item.fuel}
+                        </span>
+                        <div>
+                            <span class="text-xs font-bold text-slate-800">${item.dip} mm</span>
+                            <span class="text-[10px] text-slate-400 block">${item.date} • ${item.time}</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs font-black text-slate-900 block font-mono">${item.liters.toLocaleString()} L</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function clearHistory() {
+            historyData = [];
+            localStorage.removeItem('fuel_history_calculator');
+            renderHistory();
+            showToast("History cleared", "fa-trash-can");
+        }
+
+        // Toast Helper
+        function showToast(msg, icon = "fa-circle-check") {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            document.getElementById('toastIcon').className = `fa-solid ${icon}`;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
