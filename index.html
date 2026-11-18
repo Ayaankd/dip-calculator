@@ -125,44 +125,39 @@
 
         <!-- Calculator Keypad Grid -->
         <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-            <!-- Row 1: Keypad Clear, Backspace, Copy, Save -->
             <div class="grid grid-cols-4 gap-2">
-                <button onclick="keyPress('CLEAR')" class="key-btn py-3.5 bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-rose-700 border border-rose-200 rounded-xl font-black text-lg transition shadow-xs flex items-center justify-center">
-                    C
-                </button>
-                <button onclick="keyPress('BACK')" class="key-btn py-3.5 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-xl font-black text-lg transition shadow-xs flex items-center justify-center">
-                    <i class="fa-solid fa-backspace"></i>
-                </button>
-                <button onclick="copyLiters()" class="key-btn py-3.5 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 rounded-xl font-bold text-xs transition shadow-xs flex flex-col items-center justify-center gap-0.5">
-                    <i class="fa-solid fa-copy text-sm"></i>
-                    <span>Copy</span>
-                </button>
-                <button id="btnSave" onclick="keyPress('ENTER')" class="key-btn py-3.5 bg-hsd hover:opacity-90 active:scale-95 text-white rounded-xl font-black text-xl transition shadow-md row-span-2 flex flex-col items-center justify-center gap-1">
-                    <i class="fa-solid fa-level-down-alt rotate-90 text-base"></i>
-                    <span class="text-xs font-black tracking-wider">SAVE</span>
-                </button>
-            </div>
-
-            <!-- Numeric Buttons Grid (7, 8, 9, 4, 5, 6, 1, 2, 3, 0, .) -->
-            <div class="grid grid-cols-4 gap-2">
-                <!-- Row 2 -->
+                <!-- Row 1: 7, 8, 9, Backspace -->
                 <button onclick="keyPress('7')" class="key-btn py-3.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">7</button>
                 <button onclick="keyPress('8')" class="key-btn py-3.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">8</button>
                 <button onclick="keyPress('9')" class="key-btn py-3.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">9</button>
+                <button onclick="keyPress('BACK')" class="key-btn py-3.5 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-xl font-black text-xl transition border border-slate-200 shadow-xs flex items-center justify-center">
+                    <i class="fa-solid fa-backspace"></i>
+                </button>
 
-                <!-- Row 3 -->
+                <!-- Row 2: 4, 5, 6, Clear -->
                 <button onclick="keyPress('4')" class="key-btn py-3.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">4</button>
                 <button onclick="keyPress('5')" class="key-btn py-3.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">5</button>
                 <button onclick="keyPress('6')" class="key-btn py-3.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">6</button>
+                <button onclick="keyPress('CLEAR')" class="key-btn py-3.5 bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-rose-700 border border-rose-200 rounded-xl font-black text-xl transition shadow-xs flex items-center justify-center">
+                    C
+                </button>
 
-                <!-- Row 4 -->
+                <!-- Row 3: 1, 2, 3, Copy -->
                 <button onclick="keyPress('1')" class="key-btn py-3.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">1</button>
                 <button onclick="keyPress('2')" class="key-btn py-3.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">2</button>
                 <button onclick="keyPress('3')" class="key-btn py-3.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">3</button>
+                <button onclick="copyLiters()" class="key-btn py-3.5 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 border border-slate-200 rounded-xl font-bold text-xs transition shadow-xs flex flex-col items-center justify-center gap-0.5">
+                    <i class="fa-solid fa-copy text-sm"></i>
+                    <span>Copy</span>
+                </button>
 
-                <!-- Row 5: 0 & Decimal -->
+                <!-- Row 4: 0 (spanning 2 cols), Decimal, SAVE (Enter) -->
                 <button onclick="keyPress('0')" class="key-btn py-3.5 col-span-2 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">0</button>
                 <button onclick="keyPress('.')" class="key-btn py-3.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-900 rounded-xl font-extrabold text-2xl transition border border-slate-200 shadow-xs">.</button>
+                <button id="btnSave" onclick="keyPress('ENTER')" class="key-btn py-3.5 bg-hsd hover:opacity-90 active:scale-95 text-white rounded-xl font-black text-sm transition shadow-md flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-level-down-alt rotate-90 text-sm"></i>
+                    <span class="tracking-wider">SAVE</span>
+                </button>
             </div>
         </div>
 
